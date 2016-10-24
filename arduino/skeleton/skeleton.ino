@@ -18,7 +18,8 @@ void setup() {
   
 }
 
-unsigned long pulseDuration[2];
+signed long pulseDuration[2];
+signed long time[2];
 
 void loop() {
   
@@ -32,23 +33,31 @@ void loop() {
   // The ECHO pin will return a pulse in microseconds. To convert to distance use:
   //   uS/58  = centimeters
   //   us/148 = inch
-  pulseDuration[0] = pulseIn(SENSOR_0_ECHO, HIGH) / INCH_SCALAR;
+  time[0] = micros();
+  pulseDuration[0] = pulseIn(SENSOR_0_ECHO, HIGH);
+  time[0] = micros() - time[0];  
   
+  delay(5);
   digitalWrite(SENSOR_1_TRIG, HIGH);
   //PINC |= 0x20;
   delayMicroseconds(10);
   digitalWrite(SENSOR_1_TRIG, LOW);
   //PINC &= ~(0x20);
-  pulseDuration[1] = pulseIn(SENSOR_1_ECHO, HIGH) / INCH_SCALAR;
+
+  time[1] = micros();
+  pulseDuration[1] = pulseIn(SENSOR_1_ECHO, HIGH);
+  time[1] = micros() - time[1];
 
   Serial.print("D_0: ");
-  Serial.print(pulseDuration[0]);
-  Serial.print(" inches | D_1: ");
-  Serial.print(pulseDuration[1]);
-  Serial.println(" inches");
-  
+  Serial.print(pulseDuration[0]/INCH_SCALAR);
+  Serial.print(" inches (");
+  Serial.print(100.0 * (time[0] - pulseDuration[0])/time[0]);
+  Serial.print("% time waiting) | D_1: ");
+  Serial.print(pulseDuration[1]/INCH_SCALAR);
+  Serial.print(" inches (");
+  Serial.print(100.0 * (time[1] - pulseDuration[1])/time[1]);
+  Serial.println("% time waiting)");
+
   // Wait for a bit to not flood the serial port
-  delay(20);
-  
-  
+  delay(45);
 }
