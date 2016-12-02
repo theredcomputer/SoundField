@@ -1,11 +1,11 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#define BAUD_RATE 115000
+#define BAUD_RATE 230400
 #define INCH_SCALAR 148.0
 #define CM_SCALAR 58.0
 
-#define NUM_SENSORS 8
+#define NUM_SENSORS 10
 #define FILT_SIZE 4
 #define SENSOR_DELAY 70
 #define PULSE_TIMEOUT 60000
@@ -25,16 +25,26 @@ circ_array ca[NUM_SENSORS];
 
 uint8_t triggerSensor(uint8_t sensorNumber) {
 
-  PORTC &= ~(0x30);
-  PORTC |= (sensorNumber & 0x06) << 3;\
+  // Needed to support the hardware hacks
+  if (sensorNumber == 8) {
+    PORTC |= 0x08;
+    delayMicroseconds(10);
+    PORTC &= ~(0x08);
+  } else if (sensorNumber == 9) {
+    PORTC |= 0x04;
+    delayMicroseconds(10);
+    PORTC &= ~(0x04);
+  } else {
+    PORTC &= ~(0x30);
+    PORTC |= (sensorNumber & 0x06) << 3;
 
-  PORTB &= ~(0x20);
-  PORTB |= (sensorNumber & 0x01) << 5;
+    PORTB &= ~(0x20);
+    PORTB |= (sensorNumber & 0x01) << 5;
   
-  digitalWrite(12, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(12, LOW);
-  
+    digitalWrite(12, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(12, LOW);
+  }
   return 0; 
 }
 
@@ -51,8 +61,8 @@ void setup() {
   for (int i = 12; i < 14; i++)
   //for (int i = 7; i < 12; i++)
     pinMode(i,  OUTPUT);
-  DDRC |= 0x30;
-  PORTC &= ~(0x30);
+  DDRC |= 0x3C;
+  PORTC &= ~(0x3C);
   
   // Initialize sensor value store
   for (uint8_t j = 0; j < NUM_SENSORS; j++) {
@@ -83,7 +93,8 @@ void loop() {
 
     // If bad pulse value, add the average to maintain stability
     if (pulse < LOW_THRESHOLD || pulse > HIGH_THRESHOLD)
-      pulse = ca[i].total / FILT_SIZE;
+      //pulse = ca[i].total / FILT_SIZE;
+      pulse = 0;
 
     // Add the new value to the averager
     ca[i].total += (pulse - ca[i].data[ca[i].head]);
