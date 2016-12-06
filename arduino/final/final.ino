@@ -6,7 +6,7 @@
 #define CM_SCALAR 58.0
 
 #define NUM_SENSORS 10
-#define FILT_SIZE 4
+#define FILT_SIZE 2
 #define SENSOR_DELAY 70
 #define PULSE_TIMEOUT 60000
 #define LOW_THRESHOLD 1

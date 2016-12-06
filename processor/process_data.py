@@ -11,8 +11,8 @@ NUM_SENSORS  = 10
 MAX_OBJ_WIDTH = 24
 MAX_OBJ_SWAY = 10
 
-COUNT_THRESH = 3
-STRIKE_THRESH = 3
+COUNT_THRESH = 1
+STRIKE_THRESH = 2
 
 
 if __name__ == "__main__":
@@ -42,14 +42,14 @@ if __name__ == "__main__":
             
         '''
         # Get the sensor columns where an object is seen by both sensors
-        seen_by_both = [i for i, e in enumerate([1 if abs(d0 - d1) < MAX_OBJ_WIDTH / 2 else 0 for d0, d1 in zip(dist_data_0, dist_data_1)]) if e != 0]
+        #seen_by_both = [i for i, e in enumerate([1 if abs(d0 - d1) < MAX_OBJ_WIDTH / 2 else 0 for d0, d1 in zip(dist_data_0, dist_data_1)]) if e != 0]
         
         # Translate seen items into coordinates
-        coords.extend([(s * SENSOR_PITCH, d0 + (MAX_OBJ_WIDTH / 2)) for s, d0 in zip(seen_by_both, dist_data_0)])
+        #coords.extend([(s * SENSOR_PITCH, d0 + (MAX_OBJ_WIDTH / 2)) for s, d0 in zip(seen_by_both, dist_data_0)])
 
         # Get anything seen by A
-        #seen_by_a = [i for i, e in enumerate([1 if d0 > 0 else 0 for d0 in dist_data_0]) if e != 0]
-        #coords.extend([(s * SENSOR_PITCH, d0 + (MAX_OBJ_WIDTH / 2)) for s, d0 in zip(seen_by_a, dist_data_0])
+        seen_by_a = [i for i, e in enumerate([1 if d0 > 0 else 0 for d0 in dist_data_0]) if e != 0]
+        coords.extend([(s * SENSOR_PITCH, d0 + (MAX_OBJ_WIDTH / 2)) for s, d0 in zip(seen_by_a, dist_data_0)])
         
 
         # Get anything seen by B
@@ -124,3 +124,7 @@ if __name__ == "__main__":
         print tracked_coords
         print stable_coords
         print
+
+        with open("/home/stephen/Desktop/scc_server/data.txt", "w") as f:
+            for s in stable_coords:
+                f.write(str(s[0]) + "," + str(s[1]) + "\n")
